@@ -355,6 +355,12 @@ NS_SWIFT_NAME(Auth)
  */
 @property(nonatomic, strong, nullable) NSData *APNSToken API_UNAVAILABLE(macos, tvos, watchos);
 
+/** @property AuthDomain
+ * @brief The authentication domain used to handle all sign-in redirects. End-users will see this
+ * domain when signing in. This domain must be whitelisted in the Firebase Console.
+ */
+@property(nonatomic, strong, nullable) NSString *AuthDomain;
+
 /** @fn init
     @brief Please access auth instances using `Auth.auth()` and `Auth.auth(app:)`.
  */
@@ -857,6 +863,20 @@ NS_SWIFT_NAME(Auth)
  */
 - (void)revokeTokenWithAuthorizationCode:(NSString *)authorizationCode
                               completion:(nullable void (^)(NSError *_Nullable error))completion;
+
+/** @fn setAuthDomain
+ * @brief Sets the auth domain to be used for handling all sign-in redirects.
+ * @param domain The authentication domain to be set. The domain must be whitelisted in the Firebase
+ * Console. By default, the auth domain is "https://[PROJECT-ID].firebaseapp.com".
+ */
+- (void)setAuthDomain:(nonnull NSString *)domain;
+
+/** @fn getAuthDomain
+ * @brief Returns the previously set authentication domain for this instance.
+ * @return The authentication domain that was previously set, or null if none was set.
+ * If this method returns null, the default "https://[PROJECT-ID].firebaseapp.com" will be used.
+ */
+- (nullable NSString *)getAuthDomain;
 
 #pragma mark - User sharing
 

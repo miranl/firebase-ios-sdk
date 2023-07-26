@@ -79,6 +79,11 @@ static NSString *const kCustomUrlSchemePrefix = @"app-";
      otherwise.
    */
   BOOL _usingClientIDScheme;
+  
+  /** var _customAuthDomain
+   @brief  AuthDomain if set
+   */
+  NSString *_customAuthDomain;
 }
 
 + (FIROAuthCredential *)credentialWithProviderID:(NSString *)providerID
@@ -149,7 +154,7 @@ static NSString *const kCustomUrlSchemePrefix = @"app-";
   return [[self alloc] initWithProviderID:providerID auth:auth];
 }
 
-#if TARGET_OS_IOS && (!defined(TARGET_OS_VISION) || !TARGET_OS_VISION)
+#if TARGET_OS_IOS && (!defined(TARGET_OS_XR) || !TARGET_OS_XR)
 - (void)getCredentialWithUIDelegate:(nullable id<FIRAuthUIDelegate>)UIDelegate
                          completion:(nullable FIRAuthCredentialCallback)completion {
   if (![FIRAuthWebUtils isCallbackSchemeRegisteredForCustomURLScheme:self->_callbackScheme]) {
@@ -216,7 +221,7 @@ static NSString *const kCustomUrlSchemePrefix = @"app-";
                           }];
   });
 }
-#endif  // TARGET_OS_IOS && (!defined(TARGET_OS_VISION) || !TARGET_OS_VISION)
+#endif  // TARGET_OS_IOS && (!defined(TARGET_OS_XR) || !TARGET_OS_XR)
 
 #pragma mark - Internal Methods
 
@@ -253,6 +258,9 @@ static NSString *const kCustomUrlSchemePrefix = @"app-";
           stringByAppendingString:[_auth.app.options.googleAppID
                                       stringByReplacingOccurrencesOfString:@":"
                                                                 withString:@"-"]];
+    }
+    if(auth.AuthDomain.length) {
+      _customAuthDomain = auth.AuthDomain;
     }
   }
   return self;

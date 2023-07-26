@@ -1561,6 +1561,15 @@ static NSMutableDictionary *gKeychainServiceNameForAppName;
       }];
 }
 
+- (void)setAuthDomain:(NSString *)domain {
+  NSAssert(!domain || !domain.length, @"Given String is empty or null");
+  _AuthDomain = domain;
+}
+
+- (nullable NSString *)getAuthDomain {
+  return _AuthDomain;
+}
+
 #if TARGET_OS_IOS
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-property-ivar"
