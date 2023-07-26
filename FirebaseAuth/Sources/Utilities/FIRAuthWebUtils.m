@@ -107,19 +107,29 @@ NS_ASSUME_NONNULL_BEGIN
                 // The sequence of supportedAuthDomains matters. ("firebaseapp.com", "web.app")
                 // The searching ends once the first valid suportedAuthDomain is found.
                 NSString *authDomain;
-                for (NSString *domain in response.authorizedDomains) {
-                  for (NSString *suportedAuthDomain in [self supportedAuthDomains]) {
-                    NSInteger index = domain.length - suportedAuthDomain.length;
-                    if (index >= 2) {
-                      if ([domain hasSuffix:suportedAuthDomain] &&
-                          domain.length >= suportedAuthDomain.length + 2) {
-                        authDomain = domain;
-                        break;
-                      }
+                NSString *customAuthDomain = requestConfiguration.auth.AuthDomain;
+                if (customAuthDomain) {
+                  for (NSString *domain in response.authorizedDomains) {
+                    if (customAuthDomain == domain) {
+                      authDomain = customAuthDomain;
+                      break;
                     }
                   }
-                  if (authDomain != nil) {
-                    break;
+                } else {
+                  for (NSString *domain in response.authorizedDomains) {
+                    for (NSString *suportedAuthDomain in [self supportedAuthDomains]) {
+                      NSInteger index = domain.length - suportedAuthDomain.length;
+                      if (index >= 2) {
+                        if ([domain hasSuffix:suportedAuthDomain] &&
+                            domain.length >= suportedAuthDomain.length + 2) {
+                          authDomain = domain;
+                          break;
+                        }
+                      }
+                    }
+                    if (authDomain != nil) {
+                      break;
+                    }
                   }
                 }
                 if (!authDomain.length) {

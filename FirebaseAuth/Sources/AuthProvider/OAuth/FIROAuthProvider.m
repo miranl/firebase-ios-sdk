@@ -79,7 +79,7 @@ static NSString *const kCustomUrlSchemePrefix = @"app-";
      otherwise.
    */
   BOOL _usingClientIDScheme;
-  
+
   /** var _customAuthDomain
    @brief  AuthDomain if set
    */
@@ -259,7 +259,7 @@ static NSString *const kCustomUrlSchemePrefix = @"app-";
                                       stringByReplacingOccurrencesOfString:@":"
                                                                 withString:@"-"]];
     }
-    if(auth.AuthDomain.length) {
+    if (auth.AuthDomain.length) {
       _customAuthDomain = auth.AuthDomain;
     }
   }
