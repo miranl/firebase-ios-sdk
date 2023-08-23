@@ -229,7 +229,7 @@ static NSString *const kDummyFACTokenValue = @"eyJlcnJvciI6IlVOS05PV05fRVJST1Iif
     if (token) {
       tokenResult = [[FIRAppCheckTokenResult alloc] initWithToken:token.token error:nil];
     } else {
-      tokenResult = [[FIRAppCheckTokenResult alloc] initWithToken:token.token error:error];
+      tokenResult = [[FIRAppCheckTokenResult alloc] initWithToken:kDummyFACTokenValue error:error];
     }
 
     handler(tokenResult);
