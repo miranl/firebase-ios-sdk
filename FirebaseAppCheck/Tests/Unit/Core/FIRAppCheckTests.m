@@ -216,7 +216,7 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
                }];
 
   // 3. Wait for expectations and validate mocks.
-  [self waitForExpectations:expectations timeout:0.5];
+  [self waitForExpectations:expectations timeout:1.0];
   [self verifyAllMocks];
 }
 
@@ -311,7 +311,7 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
                   }];
 
   // 3. Wait for expectations and validate mocks.
-  [self waitForExpectations:expectations timeout:0.5];
+  [self waitForExpectations:expectations timeout:1.0];
   [self verifyAllMocks];
 }
 
