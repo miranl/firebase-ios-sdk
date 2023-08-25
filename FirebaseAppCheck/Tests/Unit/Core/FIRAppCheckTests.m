@@ -202,12 +202,14 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
 
   NSArray * /*[tokenNotification, getToken]*/ expectations =
       [self configuredExpectations_GetTokenWhenError_withError:providerError andToken:cachedToken];
+  XCTestExpectation *noNotificationExpectation = expectations.firstObject;
+  XCTestExpectation *getTokenExpectation = expectations.lastObject;
 
   // 2. Request token and verify result.
   [self.appCheck
       tokenForcingRefresh:NO
                completion:^(FIRAppCheckToken *_Nullable token, NSError *_Nullable error) {
-                 [expectations.lastObject fulfill];
+                 [getTokenExpectation fulfill];
                  XCTAssertNil(token);
                  XCTAssertNotNil(error);
                  XCTAssertNotEqualObjects(error, providerError);
@@ -216,7 +218,8 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
                }];
 
   // 3. Wait for expectations and validate mocks.
-  [self waitForExpectations:expectations timeout:1.0];
+  [self waitForExpectations:@[ getTokenExpectation ] timeout:0.5];
+  [self waitForExpectations:@[ noNotificationExpectation ] timeout:0.5];
   [self verifyAllMocks];
 }
 
@@ -297,12 +300,14 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
 
   NSArray * /*[tokenNotification, getToken]*/ expectations =
       [self configuredExpectations_GetTokenWhenError_withError:providerError andToken:cachedToken];
+  XCTestExpectation *noNotificationExpectation = expectations.firstObject;
+  XCTestExpectation *getTokenNotification = expectations.lastObject;
 
   // 2. Request token and verify result.
   [self.appCheck
       getTokenForcingRefresh:NO
                   completion:^(id<FIRAppCheckTokenResultInterop> result) {
-                    [expectations.lastObject fulfill];
+                    [getTokenNotification fulfill];
                     XCTAssertNotNil(result);
                     XCTAssertEqualObjects(result.token, kDummyToken);
                     XCTAssertEqualObjects(result.error, providerError);
@@ -311,7 +316,8 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
                   }];
 
   // 3. Wait for expectations and validate mocks.
-  [self waitForExpectations:expectations timeout:1.0];
+  [self waitForExpectations:@[ getTokenNotification ] timeout:0.5];
+  [self waitForExpectations:@[ noNotificationExpectation ] timeout:0.5];
   [self verifyAllMocks];
 }
 
