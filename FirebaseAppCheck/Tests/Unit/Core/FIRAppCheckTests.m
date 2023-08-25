@@ -202,14 +202,12 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
 
   NSArray * /*[tokenNotification, getToken]*/ expectations =
       [self configuredExpectations_GetTokenWhenError_withError:providerError andToken:cachedToken];
-  XCTestExpectation *noNotificationExpectation = expectations.firstObject;
-  XCTestExpectation *getTokenExpectation = expectations.lastObject;
 
   // 2. Request token and verify result.
   [self.appCheck
       tokenForcingRefresh:NO
                completion:^(FIRAppCheckToken *_Nullable token, NSError *_Nullable error) {
-                 [getTokenExpectation fulfill];
+                 [expectations.lastObject fulfill];
                  XCTAssertNil(token);
                  XCTAssertNotNil(error);
                  XCTAssertNotEqualObjects(error, providerError);
@@ -218,8 +216,7 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
                }];
 
   // 3. Wait for expectations and validate mocks.
-  [self waitForExpectations:@[ getTokenExpectation ] timeout:0.5];
-  [self waitForExpectations:@[ noNotificationExpectation ] timeout:0.5];
+  [self waitForExpectations:expectations timeout:0.5];
   [self verifyAllMocks];
 }
 
@@ -300,14 +297,12 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
 
   NSArray * /*[tokenNotification, getToken]*/ expectations =
       [self configuredExpectations_GetTokenWhenError_withError:providerError andToken:cachedToken];
-  XCTestExpectation *noNotificationExpectation = expectations.firstObject;
-  XCTestExpectation *getTokenNotification = expectations.lastObject;
 
   // 2. Request token and verify result.
   [self.appCheck
       getTokenForcingRefresh:NO
                   completion:^(id<FIRAppCheckTokenResultInterop> result) {
-                    [getTokenNotification fulfill];
+                    [expectations.lastObject fulfill];
                     XCTAssertNotNil(result);
                     XCTAssertEqualObjects(result.token, kDummyToken);
                     XCTAssertEqualObjects(result.error, providerError);
@@ -316,8 +311,7 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
                   }];
 
   // 3. Wait for expectations and validate mocks.
-  [self waitForExpectations:@[ getTokenNotification ] timeout:0.5];
-  [self waitForExpectations:@[ noNotificationExpectation ] timeout:0.5];
+  [self waitForExpectations:expectations timeout:0.5];
   [self verifyAllMocks];
 }
 
@@ -332,8 +326,7 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
   OCMStub([self.mockAppCheckCore limitedUseTokenWithCompletion:completionArg2]);
 
   // 2. Don't expect token update notification to be sent.
-  XCTestExpectation *notificationExpectation = [self tokenUpdateNotificationWithExpectedToken:@""
-                                                                                   isInverted:YES];
+  XCTestExpectation *notificationExpectation = [self tokenUpdateNotificationNotPosted];
   // 3. Expect token request to be completed.
   XCTestExpectation *getTokenExpectation = [self expectationWithDescription:@"getToken"];
 
@@ -361,8 +354,7 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
   OCMReject([self.mockAppCheckProvider getTokenWithCompletion:[OCMArg any]]);
 
   // 3. Don't expect token update notification to be sent.
-  XCTestExpectation *notificationExpectation = [self tokenUpdateNotificationWithExpectedToken:@""
-                                                                                   isInverted:YES];
+  XCTestExpectation *notificationExpectation = [self tokenUpdateNotificationNotPosted];
   // 4. Expect token request to be completed.
   XCTestExpectation *getTokenExpectation = [self expectationWithDescription:@"getToken"];
 
@@ -429,11 +421,6 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
 }
 
 - (XCTestExpectation *)tokenUpdateNotificationWithExpectedToken:(NSString *)expectedToken {
-  return [self tokenUpdateNotificationWithExpectedToken:expectedToken isInverted:NO];
-}
-
-- (XCTestExpectation *)tokenUpdateNotificationWithExpectedToken:(NSString *)expectedToken
-                                                     isInverted:(BOOL)isInverted {
   XCTestExpectation *expectation =
       [self expectationForNotification:[self.appCheck tokenDidChangeNotificationName]
                                 object:nil
@@ -448,7 +435,15 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
                                  XCTAssertEqualObjects(notification.object, self.appCheck);
                                  return YES;
                                }];
-  expectation.inverted = isInverted;
+  return expectation;
+}
+
+- (XCTestExpectation *)tokenUpdateNotificationNotPosted {
+  XCTNSNotificationExpectation *expectation = [[XCTNSNotificationExpectation alloc]
+            initWithName:[self.appCheck tokenDidChangeNotificationName]
+                  object:nil
+      notificationCenter:self.notificationCenter];
+  expectation.inverted = YES;
   return expectation;
 }
 
@@ -485,8 +480,7 @@ static NSString *const kDummyToken = @"eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==";
   OCMReject([self.mockAppCheckProvider getTokenWithCompletion:[OCMArg any]]);
 
   // 3. Expect token update notification to be sent.
-  XCTestExpectation *notificationExpectation = [self tokenUpdateNotificationWithExpectedToken:@""
-                                                                                   isInverted:YES];
+  XCTestExpectation *notificationExpectation = [self tokenUpdateNotificationNotPosted];
 
   // 4. Expect token request to be completed.
   XCTestExpectation *getTokenExpectation = [self expectationWithDescription:@"getToken"];
